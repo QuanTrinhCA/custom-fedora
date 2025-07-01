@@ -42,9 +42,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
 
     steps:
       - name: Downcase REGISTRY
@@ -67,7 +64,7 @@ jobs:
         # --enablerepo=updates-testing --refresh --advisory=FEDORA-2025-4b9488bb4d
 
       - name: Install cosign
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: sigstore/cosign-installer@v3
 
       - name: Checkout repository
@@ -79,7 +76,7 @@ jobs:
 
       - name: Login to Container Registry
         uses: redhat-actions/podman-login@v1
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -136,22 +133,24 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: latest
+          tags: latest ${VERSION}
           containerfiles: ${{ env.IMAGE_NAME }}/Containerfile.labels
           context: ${{ env.IMAGE_NAME }}
           layers: false
           oci: true
           labels: |
-            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.version=${VERSION}
             org.opencontainers.image.title=Fedora Kinoite
             org.opencontainers.image.description=Customized image of Fedora Kinoite
             org.opencontainers.image.source=https://github.com/QuanTrinhCA/custom-fedora
             org.opencontainers.image.licenses=MIT
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Push to Container Registry
         uses: redhat-actions/push-to-registry@v2
         id: push
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -161,17 +160,12 @@ jobs:
           extra-args: |
             --compression-format=zstd
 
-      # Sign the resulting Docker image digest except on PRs.
-      # This will only write to the public Rekor transparency log when the Docker
-      # repository is public to avoid leaking data.  If you would like to publish
-      # transparency data even for private images, pass --force to cosign below.
-      # https://github.com/sigstore/cosign
       - name: Sign the published container image
-        if: ${{ github.event_name != 'pull_request' }}
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: cosign sign \
+          --yes \
+          --key env://COSIGN_PRIVATE_KEY \
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${DIGEST}
         env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        # This step uses the identity token to provision an ephemeral certificate
-        # against the sigstore community Fulcio instance.
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+          DIGEST: ${{ steps.push.outputs.digest }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGSTORE_PRIVATE_KEY }}
