@@ -87,4 +87,4 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.licenses=MIT
           extra-args: |
-            --annotation 'org.opencontainers.image.description=Customized
+            --annotation org.opencontainers.image.description=Customized
