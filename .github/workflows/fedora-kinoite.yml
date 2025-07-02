@@ -2,6 +2,11 @@
 
 name: "Build Fedora Kinoite image"
 
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+  IMAGE_NAME: fedora-kinoite
+  BASE_IMAGE: quay.io/fedora/fedora-kinoite:latest
+
 on:
   workflow_dispatch:
     inputs:
@@ -41,7 +46,7 @@ jobs:
           set -euxo pipefail
           dnf upgrade -y --refresh
           dnf install -y buildah skopeo rpm-ostree jq --exclude container-selinux
-          
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
