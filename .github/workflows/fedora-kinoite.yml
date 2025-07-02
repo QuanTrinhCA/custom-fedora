@@ -2,11 +2,6 @@
 
 name: "Build Fedora Kinoite image"
 
-env:
-  REGISTRY: ghcr.io/${{ github.repository_owner }}
-  IMAGE_NAME: fedora-kinoite
-  BASE_IMAGE: quay.io/fedora/fedora-kinoite:latest
-
 on:
   workflow_dispatch:
     inputs:
@@ -24,4 +19,4 @@ jobs:
     uses: ./.github/workflows/signing.yml
     secrets: inherit
     with:
-      registry: ${{ env.REGISTRY }}
+      registry: ghcr.io/${{ github.repository_owner }}
