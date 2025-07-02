@@ -101,3 +101,7 @@ jobs:
             --annotation org.opencontainers.image.description=${TEST}
         env:
           TEST: Customized image of Fedora Kinoite
+      
+      - name: Inspect
+        run: |
+          podman image inspect --format='{{json .Config.Labels}}' localhost/fedora-kinoite:build | jq
