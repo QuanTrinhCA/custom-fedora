@@ -100,4 +100,4 @@ jobs:
           extra-args: |
             --annotation org.opencontainers.image.description=${TEST}
           env:
-            TEST: "Customized image of Fedora Kinoite"
+            TEST: ${{ BASE_IMAGE }}
