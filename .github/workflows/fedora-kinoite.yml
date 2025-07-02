@@ -115,6 +115,18 @@ jobs:
           context: ${{ env.IMAGE_NAME }}
           layers: true
           oci: true
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.title=Fedora Kinoite
+            org.opencontainers.image.description=Customized image of Fedora Kinoite
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+          extra-args: |
+            --annotation 'org.opencontainers.image.version=${{ steps.version.outputs.version }}'
+            --annotation 'org.opencontainers.image.title=Fedora Kinoite'
+            --annotation 'org.opencontainers.image.description=Customized image of Fedora Kinoite'
+            --annotation 'org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}'
+            --annotation 'org.opencontainers.image.licenses=MIT'
 
       - name: Rechunk container image
         run: |
@@ -144,6 +156,12 @@ jobs:
             org.opencontainers.image.description=Customized image of Fedora Kinoite
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.licenses=MIT
+          extra-args: |
+            --annotation 'org.opencontainers.image.version=${{ steps.version.outputs.version }}'
+            --annotation 'org.opencontainers.image.title=Fedora Kinoite'
+            --annotation 'org.opencontainers.image.description=Customized image of Fedora Kinoite'
+            --annotation 'org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}'
+            --annotation 'org.opencontainers.image.licenses=MIT'
 
       - name: Push to Container Registry
         uses: redhat-actions/push-to-registry@v2
