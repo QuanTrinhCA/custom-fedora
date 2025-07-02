@@ -104,4 +104,4 @@ jobs:
       
       - name: Inspect
         run: |
-          podman image inspect --format='{{json .Config}}' localhost/fedora-kinoite:build | jq
+          podman image inspect --format='{{json .Annotations}}' localhost/fedora-kinoite:build | jq
