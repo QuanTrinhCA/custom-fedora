@@ -122,11 +122,7 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.licenses=MIT
           extra-args: |
-            --annotation 'org.opencontainers.image.version=${{ steps.version.outputs.version }}'
-            --annotation 'org.opencontainers.image.title=Fedora Kinoite'
-            --annotation 'org.opencontainers.image.description=Customized image of Fedora Kinoite'
-            --annotation 'org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}'
-            --annotation 'org.opencontainers.image.licenses=MIT'
+            --annotation 'org.opencontainers.image.description=Customized
 
       - name: Rechunk container image
         run: |
