@@ -8,20 +8,6 @@ env:
   BASE_IMAGE: quay.io/fedora/fedora-kinoite:latest
 
 on:
-  schedule:
-    - cron: '0 2 * * *'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'fedora-kinoite/**'
-      - '.github/workflows/fedora-kinoite.yml'
-  push:
-    branches:
-      - main
-    paths:
-      - 'fedora-kinoite/**'
-      - '.github/workflows/fedora-kinoite.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -37,3 +23,5 @@ jobs:
   sign-published-image:
     uses: ./.github/workflows/signing.yml
     secrets: inherit
+    with:
+      registry: ${{ env.REGISTRY }}

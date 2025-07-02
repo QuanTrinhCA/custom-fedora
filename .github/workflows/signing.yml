@@ -2,14 +2,23 @@ name: "Sign published container image"
 
 on:
   workflow_call:
+    inputs:
+      registry:
+        required: true
+        type: string
 
 jobs:
   sign:
     runs-on: ubuntu-latest
     environment: cosign-signing
     steps:
-      - name: Sign the published container image
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Login to Container Registry
         run: |
-          echo ${COSIGN_PRIVATE_KEY}
+          cosign login ${REGISTRY%%/*} \
+          --username ${{ github.actor }} \
+          --password ${{ secrets.GITHUB_TOKEN }}
         env:
-          COSIGN_PRIVATE_KEY: ${{ secrets.sigstore_private_key }}
+          REGISTRY: ${{ inputs.registry }}
