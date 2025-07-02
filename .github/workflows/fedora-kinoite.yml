@@ -36,3 +36,4 @@ concurrency:
 jobs:
   sign-published-image:
     uses: ./.github/workflows/signing.yml
+    secrets: inherit
