@@ -15,8 +15,76 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sign-published-image:
-    uses: ./.github/workflows/signing.yml
-    secrets: inherit
-    with:
-      registry: ghcr.io/${{ github.repository_owner }}
+  build-image:
+    runs-on: ubuntu-latest
+
+    container: 
+      image: quay.io/containers/podman
+      options: --privileged --volume /:/run/host:rw --user 0:0
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+      registry: ${{ env.REGISTRY }}
+      image: ${{ steps.relabel.outputs.image }}
+
+    steps:
+      - name: Downcase REGISTRY
+        run: |
+          echo "REGISTRY=${REGISTRY,,}" >> ${GITHUB_ENV}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add missing .docker folder
+        run: |
+          mkdir -p /github/home/.docker/
+
+      - name: Login to Container Registry
+        uses: redhat-actions/podman-login@v1
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          auth_file_path: /tmp/auth.json
+
+      - name: Figure out version
+        id: version
+        run: |
+          set -exo pipefail
+          if [[ -n ${VERSION_OVERRIDE} ]]; then
+            version_base="${VERSION_OVERRIDE}"
+          else
+            version_base="$(skopeo inspect docker://${BASE_IMAGE} | jq -r '.Labels."org.opencontainers.image.version"')"
+          fi
+          build_date="$(date -u +"%Y%m%dT%H%M%SZ")"
+          tag="${version_base}-${build_date}"
+          version="${version_base}+${build_date}"
+          echo "Base version: ${version_base}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+        env:
+          VERSION_OVERRIDE: ${{ inputs.version }}
+
+      - name: Build container image
+        uses: redhat-actions/buildah-build@v2
+        id: build
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: build
+          containerfiles: ${{ env.IMAGE_NAME }}/Containerfile
+          context: ${{ env.IMAGE_NAME }}
+          layers: true
+          oci: true
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.title=Fedora Kinoite
+            org.opencontainers.image.description=Customized image of Fedora Kinoite
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+          extra-args: |
+            --annotation 'org.opencontainers.image.description=Customized
