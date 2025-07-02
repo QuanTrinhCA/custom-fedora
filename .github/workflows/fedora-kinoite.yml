@@ -36,6 +36,12 @@ jobs:
         run: |
           echo "REGISTRY=${REGISTRY,,}" >> ${GITHUB_ENV}
 
+      - name: Install prereqs
+        run: |
+          set -euxo pipefail
+          dnf upgrade -y --refresh
+          dnf install -y buildah skopeo rpm-ostree jq --exclude container-selinux
+          
       - name: Checkout repository
         uses: actions/checkout@v4
 
