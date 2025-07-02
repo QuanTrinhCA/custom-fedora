@@ -84,7 +84,7 @@ jobs:
       - name: Build container image
         run: |
           buildah build \
-          -f ${{ github.workspace }}/${{ IMAGE_NAME }}/Containerfile \
+          -f ${{ github.workspace }}/${{ env.IMAGE_NAME }}/Containerfile \
           --label org.opencontainers.image.version="${{ steps.version.outputs.version }}" \
           --label org.opencontainers.image.title="Fedora Kinoite" \
           --label org.opencontainers.image.description="Customized image of Fedora Kinoite" \
@@ -98,7 +98,7 @@ jobs:
           --annotation org.opencontainers.image.description="Customized image of Fedora Kinoite" \
           --annotation org.opencontainers.image.source="${{ github.server_url }}/${{ github.repository }}" \
           --annotation org.opencontainers.image.licenses="MIT" \
-          -t fedora-kinoite:build ${{ github.workspace }}/${{ IMAGE_NAME }}
+          -t fedora-kinoite:build ${{ github.workspace }}/${{ env.IMAGE_NAME }}
       
       - name: Inspect
         run: |
