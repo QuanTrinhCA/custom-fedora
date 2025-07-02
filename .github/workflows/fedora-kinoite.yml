@@ -24,4 +24,4 @@ jobs:
     uses: ./.github/workflows/signing.yml
     secrets: inherit
     with:
-      registry: ${{ env.registry }}
+      registry: ${{ env.REGISTRY }}
