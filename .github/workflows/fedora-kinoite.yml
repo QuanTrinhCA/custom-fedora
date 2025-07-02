@@ -83,21 +83,22 @@ jobs:
 
       - name: Build container image
         run: |
-           -f ${{ github.workspace }}/${{ IMAGE_NAME }}/Containerfile \
-           --label org.opencontainers.image.version="${{ steps.version.outputs.version }}" \
-           --label org.opencontainers.image.title="Fedora Kinoite" \
-           --label org.opencontainers.image.description="Customized image of Fedora Kinoite" \
-           --label org.opencontainers.image.source="${{ github.server_url }}/${{ github.repository }}" \
-           --label org.opencontainers.image.licenses="MIT" \
-           --format oci \
-           --tls-verify=true \
-           --layers=true \
-           --annotation org.opencontainers.image.version="${{ steps.version.outputs.version }}" \
-           --annotation org.opencontainers.image.title="Fedora Kinoite" \
-           --annotation org.opencontainers.image.description="Customized image of Fedora Kinoite" \
-           --annotation org.opencontainers.image.source="${{ github.server_url }}/${{ github.repository }}" \
-           --annotation org.opencontainers.image.licenses="MIT" \
-           -t fedora-kinoite:build ${{ github.workspace }}/${{ IMAGE_NAME }}
+          buildah build \
+          -f ${{ github.workspace }}/${{ IMAGE_NAME }}/Containerfile \
+          --label org.opencontainers.image.version="${{ steps.version.outputs.version }}" \
+          --label org.opencontainers.image.title="Fedora Kinoite" \
+          --label org.opencontainers.image.description="Customized image of Fedora Kinoite" \
+          --label org.opencontainers.image.source="${{ github.server_url }}/${{ github.repository }}" \
+          --label org.opencontainers.image.licenses="MIT" \
+          --format oci \
+          --tls-verify=true \
+          --layers=true \
+          --annotation org.opencontainers.image.version="${{ steps.version.outputs.version }}" \
+          --annotation org.opencontainers.image.title="Fedora Kinoite" \
+          --annotation org.opencontainers.image.description="Customized image of Fedora Kinoite" \
+          --annotation org.opencontainers.image.source="${{ github.server_url }}/${{ github.repository }}" \
+          --annotation org.opencontainers.image.licenses="MIT" \
+          -t fedora-kinoite:build ${{ github.workspace }}/${{ IMAGE_NAME }}
       
       - name: Inspect
         run: |
