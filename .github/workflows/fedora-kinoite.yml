@@ -99,5 +99,5 @@ jobs:
             org.opencontainers.image.licenses=MIT
           extra-args: |
             --annotation org.opencontainers.image.description=${TEST}
-          env:
-            TEST: ${{ BASE_IMAGE }}
+        env:
+          TEST: Customized image of Fedora Kinoite
